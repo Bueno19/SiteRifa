@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $title ?? 'Painel do Usuário' }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="min-h-screen bg-[#07070b] text-white antialiased">
+    @php
+        $whatsLink = $whatsLink ?? '#';
+    @endphp
+
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,123,0,0.14),_transparent_30%),linear-gradient(to_bottom,_#0a0a10,_#07070b)]"></div>
+        <div class="absolute inset-0 opacity-[0.10] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:34px_34px]"></div>
+    </div>
+
+    <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+        <aside class="border-r border-white/10 bg-black/20 backdrop-blur">
+            <div class="p-6">
+                <a href="{{ route('home') }}" class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 font-black shadow-[0_0_24px_rgba(255,102,0,0.35)]">
+                        R
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-orange-400">Área do usuário</p>
+                        <h1 class="text-lg font-black">{{ $campaignTitle ?? 'Mega Rifa Gamer' }}</h1>
+                    </div>
+                </a>
+            </div>
+
+            <nav class="space-y-2 px-4 pb-6">
+                <a href="{{ route('dashboard') }}"
+                   class="block rounded-2xl border px-4 py-3 transition
+                   {{ request()->routeIs('dashboard')
+                        ? 'border-orange-400/20 bg-orange-500/10 font-semibold text-white'
+                        : 'border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white' }}">
+                    Dashboard
+                </a>
+
+                <a href="{{ route('numbers') }}"
+                   class="block rounded-2xl border px-4 py-3 transition
+                   {{ request()->routeIs('numbers')
+                        ? 'border-orange-400/20 bg-orange-500/10 font-semibold text-white'
+                        : 'border-white/10 text-zinc-300 hover:bg-white/5 hover:text-white' }}">
+                    Escolher números
+                </a>
+
+                <a href="{{ route('dashboard') }}#minhas-reservas"
+                   class="block rounded-2xl border border-white/10 px-4 py-3 text-zinc-300 transition hover:bg-white/5 hover:text-white">
+                    Minhas reservas
+                </a>
+
+                <a href="{{ route('dashboard') }}#perfil"
+                   class="block rounded-2xl border border-white/10 px-4 py-3 text-zinc-300 transition hover:bg-white/5 hover:text-white">
+                    Perfil
+                </a>
+
+                <a href="{{ route('home') }}"
+                   class="block rounded-2xl border border-white/10 px-4 py-3 text-zinc-300 transition hover:bg-white/5 hover:text-white">
+                    Voltar ao site
+                </a>
+
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button
+                        type="submit"
+                        class="block w-full rounded-2xl border border-white/10 px-4 py-3 text-left text-zinc-300 transition hover:bg-white/5 hover:text-white"
+                    >
+                        Sair da conta
+                    </button>
+                </form>
+            </nav>
+        </aside>
+
+        <div class="flex min-h-screen flex-col">
+            <header class="border-b border-white/10 bg-[#090910]/80 px-6 py-4 backdrop-blur">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-zinc-400">Bem-vindo de volta,</p>
+                        <h2 class="text-2xl font-black text-white">{{ $userName ?? 'Usuário' }}</h2>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('numbers') }}"
+                           class="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-white/5">
+                            Escolher números
+                        </a>
+
+                        <a href="{{ $whatsLink }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="rounded-xl bg-gradient-to-r from-orange-500 to-red-600 px-4 py-2 text-sm font-bold text-white">
+                            WhatsApp
+                        </a>
+
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="rounded-xl border border-white/15 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-white/5"
+                            >
+                                Sair
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 px-6 py-8">
+                @yield('content')
+            </main>
+        </div>
+    </div>
+</body>
+</html>

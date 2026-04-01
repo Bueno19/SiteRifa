@@ -1,0 +1,123 @@
+Sim — no **Laravel Cloud** você pode usar o **Postgres gerenciado da própria plataforma** e anexá-lo ao ambiente do app. A Laravel Cloud oferece MySQL e Postgres gerenciados no dashboard, e o **Serverless Postgres** é fully managed, autoscaling e serverless. Para usar, você cria o banco, anexa ao ambiente na mesma região e **redeploya** para a alteração entrar em vigor. ([Laravel Cloud][1])
+
+Para o seu caso, eu faria assim:
+
+## Melhor opção
+
+* **App Laravel** na **Laravel Cloud**
+* **Banco Postgres** da **própria Laravel Cloud**
+* **Nada de Supabase** agora
+
+Isso simplifica muito o deploy e reduz o risco.
+
+## Como criar os 4 admins direto no código
+
+O jeito certo é por **Seeder**.
+
+### 1) Crie `database/seeders/AdminUserSeeder.php`
+
+```php
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class AdminUserSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $admins = [
+            [
+                'name' => 'Felipe Bueno',
+                'email' => 'felipe@seudominio.com',
+                'password' => '12345678',
+            ],
+            [
+                'name' => 'Admin 2',
+                'email' => 'admin2@seudominio.com',
+                'password' => '12345678',
+            ],
+            [
+                'name' => 'Admin 3',
+                'email' => 'admin3@seudominio.com',
+                'password' => '12345678',
+            ],
+            [
+                'name' => 'Admin 4',
+                'email' => 'admin4@seudominio.com',
+                'password' => '12345678',
+            ],
+        ];
+
+        foreach ($admins as $admin) {
+            User::updateOrCreate(
+                ['email' => $admin['email']],
+                [
+                    'name' => $admin['name'],
+                    'password' => Hash::make($admin['password']),
+                    'role' => 'admin',
+                ]
+            );
+        }
+    }
+}
+```
+
+### 2) Rode o seeder localmente
+
+```bash
+php artisan db:seed --class=AdminUserSeeder
+```
+
+### 3) Em produção na Laravel Cloud
+
+Como comandos em ambiente de produção podem exigir `--force`, rode assim: ([Laravel Cloud][2])
+
+```bash
+php artisan db:seed --class=AdminUserSeeder --force
+```
+
+## Como eu faria o deploy
+
+1. Subir o projeto para GitHub.
+2. Criar o app na Laravel Cloud.
+3. Criar e anexar um **Serverless Postgres** ao ambiente.
+4. Redeployar o ambiente. ([Laravel Cloud][3])
+5. Rodar:
+
+```bash
+php artisan migrate --force
+php artisan db:seed --class=AdminUserSeeder --force
+```
+
+6. Configurar as envs reais:
+
+   * `APP_NAME`
+   * `APP_ENV=production`
+   * `APP_DEBUG=false`
+   * `RAFFLE_WHATSAPP=...`
+
+## Observação importante
+
+Eu **não deixaria senhas reais fixas em código** por muito tempo.
+Para lançar amanhã, pode até usar isso temporariamente. Depois, o ideal é:
+
+* cada admin trocar a senha no primeiro acesso
+* ou ler as senhas iniciais via env
+
+## Resposta direta
+
+* **O Postgres vai junto?**
+  **Sim, se você criar o banco na própria Laravel Cloud e anexar ao ambiente.** ([Laravel Cloud][1])
+
+* **Dá para criar os 4 admins direto no código?**
+  **Sim, e o melhor jeito é com Seeder.**
+
+Se você quiser, o próximo passo é eu te passar a **sequência exata de deploy na Laravel Cloud**, já em ordem, sem pular nada.
+
+[1]: https://cloud.laravel.com/docs/intro?utm_source=chatgpt.com "Welcome to Laravel Cloud - Laravel Cloud"
+[2]: https://cloud.laravel.com/docs/knowledge-base/command-failed-prod-app?utm_source=chatgpt.com "Fix Production Command Failures"
+[3]: https://cloud.laravel.com/docs/resources/databases/postgres?utm_source=chatgpt.com "Serverless Postgres"
